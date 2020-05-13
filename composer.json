@@ -1,0 +1,26 @@
+{
+    "name": "dan1lov/php-vkhp",
+    "description": "VK Helper is library simplifies work with some functions VK API",
+    "homepage": "https://github.com/dan1lov/php-vkhp",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "vk",
+        "helper"
+    ],
+    "authors": [
+        {
+            "name": "Vladimir Danilov",
+            "email": "danilov@vlinc.ru",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "VKHP\\": "src/VKHP"
+        }
+    }
+}
