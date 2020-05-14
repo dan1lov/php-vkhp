@@ -128,7 +128,11 @@ class Method
             $pathinfo = pathinfo($file);
             if (! file_exists($file)) {
                 $paths[] = $fpath = tempnam(sys_get_temp_dir(), 'VKHP');
-                file_put_contents($fpath, file_get_contents($file));
+                if (($contents = file_get_contents($file)) === false) {
+                    throw new \Exception("can't retrieve file contents for path '{$file}'");
+                }
+
+                file_put_contents($fpath, $contents);
             } else { $fpath = realpath($file); }
 
             $mime_type = mime_content_type($fpath);
