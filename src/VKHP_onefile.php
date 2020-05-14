@@ -197,15 +197,18 @@ class Generator
     const GREEN = 'positive';
     const RED = 'negative';
 
+    // keyboard-mode
+    const KM_ONETIME = 1 << 0; // one_time
+    const KM_INLINE = 1 << 1; // inline
+
 
     public static function keyboard(
         array $buttons,
-        bool $one_time = false,
-        bool $inline_mode = false
+        int $mode = 0
     ): string {
         return json_encode([
-            'one_time' => $one_time,
-            'inline' => $inline_mode,
+            'one_time' => (bool) ($mode & self::KM_ONETIME),
+            'inline' => (bool) ($mode & self::KM_INLINE),
             'buttons' => $buttons
         ]);
     }
