@@ -39,6 +39,8 @@ class Method
      * @param string $access_token Access token
      * @param array  $params       Parameters for messages.send method
      *
+     * @throws Exception if field user_ids is empty
+     * 
      * @return object
      */
     public static function messagesSend(string $access_token, array $params): object
@@ -79,6 +81,9 @@ class Method
      * @param array  $files        Files to upload
      * @param array  $params       Parameters for uploading method
      *
+     * @throws Exception if peer_id parameter is not specified in $params array
+     * @throws Exception if count of files in $files array more than 5
+     * 
      * @return array
      */
     public static function uploadMessagesPhoto(
@@ -124,6 +129,8 @@ class Method
      * @param string $access_token Access token
      * @param array  $files        Files to upload
      * @param array  $params       Parameters for uploading method
+     * 
+     * @throws Exception if field peer_id/type is not specified in $params array 
      *
      * @return array
      */
@@ -169,6 +176,8 @@ class Method
      *
      * @param array   $files  Files to saving
      * @param boolean $single Flag for single uploading
+     *
+     * @throws Exception if can't retrieve file contents for a certain path
      *
      * @return array
      */

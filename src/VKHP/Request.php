@@ -46,6 +46,8 @@ class Request
      * @param array|null $headers Headers
      * @param array|null $options Additional options
      *
+     * @throws Exception if response is empty and it is impossible to decode it
+     * 
      * @return object
      */
     public static function makeJson(
