@@ -4,7 +4,7 @@ namespace VKHP;
 
 class Method
 {
-    private static $version = '5.103';
+    private static $version = '5.107';
 
 
     public static function make(
@@ -56,9 +56,14 @@ class Method
         array $files,
         array $params
     ): array {
+        if (empty($files)) { return []; }
         if (empty($params['peer_id'])) {
             throw new \Exception('field `peer_id` is empty');
         }
+        if (count($files) > 5) {
+            throw new \Exception('too much files (>5)');
+        }
+
 
         $gurl = self::make($access_token, 'photos.getMessagesUploadServer', $params);
         if ($gurl->ok === false) { return (array) $gurl; }
