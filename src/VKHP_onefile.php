@@ -1,6 +1,162 @@
 <?php
 namespace VKHP;
 
+/**
+ * Class for generating keyboard and any type buttons
+ */
+class Generator
+{
+    /**
+     * @var string
+     */
+    const WHITE = 'secondary';
+
+    /**
+     * @var string
+     */
+    const BLUE = 'primary';
+
+    /**
+     * @var string
+     */
+    const GREEN = 'positive';
+
+    /**
+     * @var string
+     */
+    const RED = 'negative';
+
+    /**
+     * @var int
+     */
+    const KM_ONETIME = 1 << 0;
+
+    /**
+     * @var int
+     */
+    const KM_INLINE = 1 << 1;
+
+    /**
+     * Generating keyboard
+     *
+     * @param array   $buttons Array of buttons
+     * @param integer $mode    Keyboard mode
+     *
+     * @return string
+     */
+    public static function keyboard(
+        array $buttons,
+        int $mode = 0
+    ): string {
+        return json_encode([
+            'one_time' => (bool) ($mode & self::KM_ONETIME),
+            'inline' => (bool) ($mode & self::KM_INLINE),
+            'buttons' => $buttons
+        ]);
+    }
+
+    /**
+     * Generate button with type text
+     *
+     * @param string     $label   Button label
+     * @param string     $color   Button color
+     * @param array|null $payload Button payload
+     *
+     * @return array
+     */
+    public static function button(
+        string $label,
+        string $color = self::WHITE,
+        ?array $payload = null
+    ): array {
+        return [
+            'action' => [
+                'type' => 'text',
+                'label' => $label,
+                'payload' => self::jEncode($payload)
+            ],
+            'color' => $color
+        ];
+    }
+
+    /**
+     * Generate button with type location
+     *
+     * @param array $payload Button payload
+     *
+     * @return array
+     */
+    public static function buttonLocation(array $payload): array
+    {
+        return [
+            'action' => [
+                'type' => 'location',
+                'payload' => self::jEncode($payload)
+            ]
+        ];
+    }
+
+    /**
+     * Generate button with type vkpay
+     *
+     * @param string $hash    Hash for button
+     * @param array  $payload Button payload
+     *
+     * @return array
+     */
+    public static function buttonVKPay(string $hash, array $payload): array
+    {
+        return [
+            'action' => [
+                'type' => 'vkpay',
+                'hash' => $hash,
+                'payload' => self::jEncode($payload)
+            ]
+        ];
+    }
+
+    /**
+     * Generate button with type open_app
+     *
+     * @param string  $label    Button label
+     * @param integer $app_id   Application id
+     * @param integer $owner_id Owner id
+     * @param string  $hash     Hash for button
+     * @param array   $payload  Button payload
+     *
+     * @return array
+     */
+    public static function buttonVKApps(
+        string $label,
+        int $app_id,
+        int $owner_id,
+        string $hash,
+        array $payload
+    ): array {
+        return [
+            'action' => [
+                'type' => 'open_app',
+                'label' => $label,
+                'app_id' => $app_id,
+                'owner_id' => $owner_id,
+                'hash' => $hash,
+                'payload' => self::jEncode($payload)
+            ]
+        ];
+    }
+
+    /**
+     * Encode payload
+     *
+     * @param mixed $payload Payload
+     *
+     * @return void
+     */
+    private static function jEncode($payload)
+    {
+        return $payload === null ? $payload : json_encode($payload);
+    }
+}
 
 /**
  * Class for making queries to VK API
@@ -41,7 +197,7 @@ class Method
      * @param array  $params       Parameters for messages.send method
      *
      * @throws Exception if field user_ids is empty
-     * 
+     *
      * @return object
      */
     public static function messagesSend(string $access_token, array $params): object
@@ -84,7 +240,7 @@ class Method
      *
      * @throws Exception if peer_id parameter is not specified in $params array
      * @throws Exception if count of files in $files array more than 5
-     * 
+     *
      * @return array
      */
     public static function uploadMessagesPhoto(
@@ -269,7 +425,7 @@ class Request
      * @param array|null $options Additional options
      *
      * @throws Exception if response is empty and it is impossible to decode it
-     * 
+     *
      * @return object
      */
     public static function makeJson(
@@ -288,158 +444,96 @@ class Request
 }
 
 /**
- * Class for generating keyboard and any type buttons
+ * Class for manage properties in temporary file
  */
-class Generator
+class Scenarios
 {
     /**
      * @var string
      */
-    const WHITE = 'secondary';
+    private $id;
 
     /**
      * @var string
      */
-    const BLUE = 'primary';
+    private $file;
 
     /**
-     * @var string
+     * @var array
      */
-    const GREEN = 'positive';
+    private $data;
 
     /**
-     * @var string
-     */
-    const RED = 'negative';
-
-    /**
-     * @var int
-     */
-    const KM_ONETIME = 1 << 0;
-
-    /**
-     * @var int
-     */
-    const KM_INLINE = 1 << 1;
-
-    /**
-     * Generating keyboard
+     * Method for checking existing temporary file
      *
-     * @param array   $buttons Array of buttons
-     * @param integer $mode    Keyboard mode
-     *
-     * @return string
-     */
-    public static function keyboard(
-        array $buttons,
-        int $mode = 0
-    ): string {
-        return json_encode([
-            'one_time' => (bool) ($mode & self::KM_ONETIME),
-            'inline' => (bool) ($mode & self::KM_INLINE),
-            'buttons' => $buttons
-        ]);
-    }
-
-    /**
-     * Generate button with type text
-     *
-     * @param string     $label   Button label
-     * @param string     $color   Button color
-     * @param array|null $payload Button payload
-     *
-     * @return array
-     */
-    public static function button(
-        string $label,
-        string $color = self::WHITE,
-        ?array $payload = null
-    ): array {
-        return [
-            'action' => [
-                'type' => 'text',
-                'label' => $label,
-                'payload' => self::jEncode($payload)
-            ],
-            'color' => $color
-        ];
-    }
-
-    /**
-     * Generate button with type location
-     *
-     * @param array $payload Button payload
-     *
-     * @return array
-     */
-    public static function buttonLocation(array $payload): array
-    {
-        return [
-            'action' => [
-                'type' => 'location',
-                'payload' => self::jEncode($payload)
-            ]
-        ];
-    }
-
-    /**
-     * Generate button with type vkpay
-     *
-     * @param string $hash    Hash for button
-     * @param array  $payload Button payload
-     *
-     * @return array
-     */
-    public static function buttonVKPay(string $hash, array $payload): array
-    {
-        return [
-            'action' => [
-                'type' => 'vkpay',
-                'hash' => $hash,
-                'payload' => self::jEncode($payload)
-            ]
-        ];
-    }
-
-    /**
-     * Generate button with type open_app
-     *
-     * @param string  $label    Button label
-     * @param integer $app_id   Application id
-     * @param integer $owner_id Owner id
-     * @param string  $hash     Hash for button
-     * @param array   $payload  Button payload
-     *
-     * @return array
-     */
-    public static function buttonVKApps(
-        string $label,
-        int $app_id,
-        int $owner_id,
-        string $hash,
-        array $payload
-    ): array {
-        return [
-            'action' => [
-                'type' => 'open_app',
-                'label' => $label,
-                'app_id' => $app_id,
-                'owner_id' => $owner_id,
-                'hash' => $hash,
-                'payload' => self::jEncode($payload)
-            ]
-        ];
-    }
-
-    /**
-     * Encode payload
-     *
-     * @param mixed $payload Payload
+     * @param string  $temp_folder Path to temporary folder
+     * @param integer $id          Unique id
+     * @param boolean $return      Flag for returning object
      *
      * @return void
      */
-    private static function jEncode($payload)
+    public static function check(string $temp_folder, int $id, bool $return = false)
     {
-        return $payload === null ? $payload : json_encode($payload);
+        if (
+            ! file_exists($temp_folder)
+            || ! file_exists("{$temp_folder}/file_id{$id}.json")
+        ) { return false; }
+        elseif (! $return) { return true; }
+
+        return new self($temp_folder, $id);
+    }
+
+    public function __construct(string $temp_folder, string $id, array $data = [])
+    {
+        if (! file_exists($temp_folder)) { return false; }
+        $this->id = $id;
+        $this->file = "{$temp_folder}/file_id{$id}.json";
+
+        if (file_exists($this->file)) {
+            $this->data = json_decode(file_get_contents( $this->file ), true);
+            if ($this->data['one_time']) { unlink($this->file); }
+        } else $this->data = $data;
+    }
+
+    /**
+     * Saving data in temporary file
+     *
+     * @return boolean
+     */
+    public function save(): bool
+    {
+        $encoded_data = json_encode($this->data, JSON_UNESCAPED_UNICODE);
+        $result_of_saving = file_put_contents($this->file, $encoded_data);
+        return !is_bool($result_of_saving);
+    }
+
+    /**
+     * Delete temporary file
+     *
+     * @return boolean
+     */
+    public function clear(): bool
+    {
+        return file_exists($this->file) ? unlink($this->file) : true;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->data[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return $this->data[$name] ?? null;
+    }
+
+    public function __isset($name)
+    {
+        return isset($this->data[$name]);
+    }
+
+    public function __unset($name)
+    {
+        unset($this->data[$name]);
     }
 }
