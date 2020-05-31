@@ -4,7 +4,7 @@ namespace VKHP;
 
 class Method
 {
-    private static $version = '5.103';
+    private static $version = '5.107';
 
 
     public static function make(
