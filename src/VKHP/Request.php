@@ -1,9 +1,21 @@
 <?php
 namespace VKHP;
 
-
+/**
+ * Class for making curl requests
+ */
 class Request
 {
+    /**
+     * Make curl request
+     *
+     * @param string     $url     URL
+     * @param array|null $fields  Post fields
+     * @param array|null $headers Headers
+     * @param array|null $options Additional options
+     *
+     * @return string
+     */
     public static function make(
         string $url,
         ?array $fields = null,
@@ -26,6 +38,16 @@ class Request
         return $response;
     }
 
+    /**
+     * Same as make(), but returned value goes through json_decode
+     *
+     * @param string     $url     URL
+     * @param array|null $fields  Post fields
+     * @param array|null $headers Headers
+     * @param array|null $options Additional options
+     *
+     * @return object
+     */
     public static function makeJson(
         string $url,
         ?array $fields = null,

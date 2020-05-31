@@ -2,13 +2,27 @@
 namespace VKHP;
 
 
+/**
+ * Class for making queries to VK API
+ */
 class Method
 {
+    /**
+     * @var string
+     */
     private static $version = '5.107';
 
-
+    /**
+     * Make query to VK API
+     *
+     * @param string $access_token Access token
+     * @param string $method       Method name
+     * @param array  $params       Parameters for method
+     * 
+     * @return object
+     */
     public static function make(
-        ?string $access_token,
+        string $access_token,
         string $method,
         array $params
     ): object {
@@ -20,6 +34,14 @@ class Method
         return $request;
     }
 
+    /**
+     * Sending message to community users
+     *
+     * @param string $access_token Access token
+     * @param array  $params       Parameters for messages.send method
+     *
+     * @return object
+     */
     public static function messagesSend(string $access_token, array $params): object
     {
         $user_ids = $params['user_ids'] ?? null;
@@ -51,6 +73,15 @@ class Method
         return (object) [ 'successful' => $suc, 'response' => $res ];
     }
 
+    /**
+     * Uploading photos to VK
+     *
+     * @param string $access_token Access token
+     * @param array  $files        Files to upload
+     * @param array  $params       Parameters for uploading method
+     *
+     * @return array
+     */
     public static function uploadMessagesPhoto(
         string $access_token,
         array $files,
@@ -88,6 +119,15 @@ class Method
         return $attachment;
     }
 
+    /**
+     * Uploading documents to VK
+     *
+     * @param string $access_token Access token
+     * @param array  $files        Files to upload
+     * @param array  $params       Parameters for uploading method
+     *
+     * @return array
+     */
     public static function uploadMessagesDoc(
         string $access_token,
         array $files,
@@ -125,7 +165,14 @@ class Method
         return $attachment;
     }
 
-
+    /**
+     * Saving files in temporary folder
+     *
+     * @param array   $files  Files to saving
+     * @param boolean $single Flag for single uploading
+     *
+     * @return array
+     */
     private static function saveFiles(array $files, bool $single = false): array
     {
         [$paths, $cfiles, $i] = [[], [], 1];
@@ -150,6 +197,13 @@ class Method
         return [ 'paths' => $paths, 'cfiles' => $cfiles ];
     }
 
+    /**
+     * Delete files from paths in $paths array
+     *
+     * @param array $paths Array of paths to deleting
+     *
+     * @return void
+     */
     private static function deleteFiles(array $paths): void
     {
         foreach ($paths as $path) {
@@ -160,8 +214,21 @@ class Method
     }
 }
 
+/**
+ * Class for making curl requests
+ */
 class Request
 {
+    /**
+     * Make curl request
+     *
+     * @param string     $url     URL
+     * @param array|null $fields  Post fields
+     * @param array|null $headers Headers
+     * @param array|null $options Additional options
+     *
+     * @return string
+     */
     public static function make(
         string $url,
         ?array $fields = null,
@@ -184,6 +251,16 @@ class Request
         return $response;
     }
 
+    /**
+     * Same as make(), but returned value goes through json_decode
+     *
+     * @param string     $url     URL
+     * @param array|null $fields  Post fields
+     * @param array|null $headers Headers
+     * @param array|null $options Additional options
+     *
+     * @return object
+     */
     public static function makeJson(
         string $url,
         ?array $fields = null,
@@ -199,18 +276,49 @@ class Request
     }
 }
 
+/**
+ * Class for generating keyboard and any type buttons
+ */
 class Generator
 {
+    /**
+     * @var string
+     */
     const WHITE = 'secondary';
+
+    /**
+     * @var string
+     */
     const BLUE = 'primary';
+
+    /**
+     * @var string
+     */
     const GREEN = 'positive';
+
+    /**
+     * @var string
+     */
     const RED = 'negative';
 
-    // keyboard-mode
-    const KM_ONETIME = 1 << 0; // one_time
-    const KM_INLINE = 1 << 1; // inline
+    /**
+     * @var int
+     */
+    const KM_ONETIME = 1 << 0;
 
+    /**
+     * @var int
+     */
+    const KM_INLINE = 1 << 1;
 
+    /**
+     * Generating keyboard
+     *
+     * @param array   $buttons Array of buttons
+     * @param integer $mode    Keyboard mode
+     *
+     * @return string
+     */
     public static function keyboard(
         array $buttons,
         int $mode = 0
@@ -222,6 +330,15 @@ class Generator
         ]);
     }
 
+    /**
+     * Generate button with type text
+     *
+     * @param string     $label   Button label
+     * @param string     $color   Button color
+     * @param array|null $payload Button payload
+     *
+     * @return array
+     */
     public static function button(
         string $label,
         string $color = self::WHITE,
@@ -237,6 +354,13 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type location
+     *
+     * @param array $payload Button payload
+     *
+     * @return array
+     */
     public static function buttonLocation(array $payload): array
     {
         return [
@@ -247,6 +371,14 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type vkpay
+     *
+     * @param string $hash    Hash for button
+     * @param array  $payload Button payload
+     *
+     * @return array
+     */
     public static function buttonVKPay(string $hash, array $payload): array
     {
         return [
@@ -258,6 +390,17 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type open_app
+     *
+     * @param string  $label    Button label
+     * @param integer $app_id   Application id
+     * @param integer $owner_id Owner id
+     * @param string  $hash     Hash for button
+     * @param array   $payload  Button payload
+     *
+     * @return array
+     */
     public static function buttonVKApps(
         string $label,
         int $app_id,
@@ -277,7 +420,13 @@ class Generator
         ];
     }
 
-
+    /**
+     * Encode payload
+     *
+     * @param mixed $payload Payload
+     *
+     * @return void
+     */
     private static function jEncode($payload)
     {
         return $payload === null ? $payload : json_encode($payload);

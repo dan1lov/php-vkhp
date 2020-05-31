@@ -1,19 +1,49 @@
 <?php
 namespace VKHP;
 
-
+/**
+ * Class for generating keyboard and any type buttons
+ */
 class Generator
 {
+    /**
+     * @var string
+     */
     const WHITE = 'secondary';
+
+    /**
+     * @var string
+     */
     const BLUE = 'primary';
+
+    /**
+     * @var string
+     */
     const GREEN = 'positive';
+
+    /**
+     * @var string
+     */
     const RED = 'negative';
 
-    // keyboard-mode
-    const KM_ONETIME = 1 << 0; // one_time
-    const KM_INLINE = 1 << 1; // inline
+    /**
+     * @var int
+     */
+    const KM_ONETIME = 1 << 0;
 
+    /**
+     * @var int
+     */
+    const KM_INLINE = 1 << 1;
 
+    /**
+     * Generating keyboard
+     *
+     * @param array   $buttons Array of buttons
+     * @param integer $mode    Keyboard mode
+     *
+     * @return string
+     */
     public static function keyboard(
         array $buttons,
         int $mode = 0
@@ -25,6 +55,15 @@ class Generator
         ]);
     }
 
+    /**
+     * Generate button with type text
+     *
+     * @param string     $label   Button label
+     * @param string     $color   Button color
+     * @param array|null $payload Button payload
+     *
+     * @return array
+     */
     public static function button(
         string $label,
         string $color = self::WHITE,
@@ -40,6 +79,13 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type location
+     *
+     * @param array $payload Button payload
+     *
+     * @return array
+     */
     public static function buttonLocation(array $payload): array
     {
         return [
@@ -50,6 +96,14 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type vkpay
+     *
+     * @param string $hash    Hash for button
+     * @param array  $payload Button payload
+     *
+     * @return array
+     */
     public static function buttonVKPay(string $hash, array $payload): array
     {
         return [
@@ -61,6 +115,17 @@ class Generator
         ];
     }
 
+    /**
+     * Generate button with type open_app
+     *
+     * @param string  $label    Button label
+     * @param integer $app_id   Application id
+     * @param integer $owner_id Owner id
+     * @param string  $hash     Hash for button
+     * @param array   $payload  Button payload
+     *
+     * @return array
+     */
     public static function buttonVKApps(
         string $label,
         int $app_id,
@@ -80,7 +145,13 @@ class Generator
         ];
     }
 
-
+    /**
+     * Encode payload
+     *
+     * @param mixed $payload Payload
+     *
+     * @return void
+     */
     private static function jEncode($payload)
     {
         return $payload === null ? $payload : json_encode($payload);

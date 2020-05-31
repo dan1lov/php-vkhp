@@ -1,14 +1,27 @@
 <?php
 namespace VKHP;
 
-
+/**
+ * Class for making queries to VK API
+ */
 class Method
 {
+    /**
+     * @var string
+     */
     private static $version = '5.107';
 
-
+    /**
+     * Make query to VK API
+     *
+     * @param string $access_token Access token
+     * @param string $method       Method name
+     * @param array  $params       Parameters for method
+     * 
+     * @return object
+     */
     public static function make(
-        ?string $access_token,
+        string $access_token,
         string $method,
         array $params
     ): object {
@@ -20,6 +33,14 @@ class Method
         return $request;
     }
 
+    /**
+     * Sending message to community users
+     *
+     * @param string $access_token Access token
+     * @param array  $params       Parameters for messages.send method
+     *
+     * @return object
+     */
     public static function messagesSend(string $access_token, array $params): object
     {
         $user_ids = $params['user_ids'] ?? null;
@@ -51,6 +72,15 @@ class Method
         return (object) [ 'successful' => $suc, 'response' => $res ];
     }
 
+    /**
+     * Uploading photos to VK
+     *
+     * @param string $access_token Access token
+     * @param array  $files        Files to upload
+     * @param array  $params       Parameters for uploading method
+     *
+     * @return array
+     */
     public static function uploadMessagesPhoto(
         string $access_token,
         array $files,
@@ -88,6 +118,15 @@ class Method
         return $attachment;
     }
 
+    /**
+     * Uploading documents to VK
+     *
+     * @param string $access_token Access token
+     * @param array  $files        Files to upload
+     * @param array  $params       Parameters for uploading method
+     *
+     * @return array
+     */
     public static function uploadMessagesDoc(
         string $access_token,
         array $files,
@@ -125,7 +164,14 @@ class Method
         return $attachment;
     }
 
-
+    /**
+     * Saving files in temporary folder
+     *
+     * @param array   $files  Files to saving
+     * @param boolean $single Flag for single uploading
+     *
+     * @return array
+     */
     private static function saveFiles(array $files, bool $single = false): array
     {
         [$paths, $cfiles, $i] = [[], [], 1];
@@ -150,6 +196,13 @@ class Method
         return [ 'paths' => $paths, 'cfiles' => $cfiles ];
     }
 
+    /**
+     * Delete files from paths in $paths array
+     *
+     * @param array $paths Array of paths to deleting
+     *
+     * @return void
+     */
     private static function deleteFiles(array $paths): void
     {
         foreach ($paths as $path) {
