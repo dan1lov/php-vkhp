@@ -49,7 +49,7 @@ class Scenarios
 
         if (file_exists($this->file)) {
             $this->data = json_decode(file_get_contents( $this->file ), true);
-            if ($this->data['one_time']) { unlink($this->file); }
+            if (isset($this->data['one_time'])) { unlink($this->file); }
         } else $this->data = $data;
     }
 
