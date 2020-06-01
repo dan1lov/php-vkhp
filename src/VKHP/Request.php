@@ -29,8 +29,10 @@ class Request
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
             CURLOPT_HTTPHEADER => $headers ?? [],
             CURLOPT_POST => $fields !== null,
-            CURLOPT_POSTFIELDS => is_array($fields) && $headers === null ? http_build_query($fields) : $fields,
         ] + (array) $options;
+        if ($ch_options[CURLOPT_POST]) {
+            $ch_options[CURLOPT_POSTFIELDS] = !$headers ? http_build_query($fields) : $fields;
+        }
         curl_setopt_array($ch, $ch_options);
 
         $response = curl_exec($ch);
@@ -46,7 +48,7 @@ class Request
      * @param array|null $headers Headers
      * @param array|null $options Additional options
      *
-     * @throws Exception if response is empty and it is impossible to decode it
+     * @throws Exception if esponse is empty or cannot be decoded
      *
      * @return object
      */
@@ -57,10 +59,11 @@ class Request
         ?array $options = null
     ): object {
         $request = self::make($url, $fields, $headers, $options);
-        if (empty($request)) {
-            throw new \Exception('response is empty, it is impossible execute json_decode');
+        $decoded = json_decode($request);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('response is empty or cannot be decoded');
         }
 
-        return json_decode($request);
+        return $decoded;
     }
 }
