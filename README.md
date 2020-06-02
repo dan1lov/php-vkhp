@@ -21,6 +21,8 @@ require 'path/to/vkhp/VKHP_onefile.php';
 ```
 
 ## Примеры использования
+### Готовые шаблоны
+Примеры ботов, построенных с использованием `VKHP`, можно найти в [dan1lov/vk-boilerplate-bot](https://github.com/dan1lov/vk-boilerplate-bot)
 ### Отправка сообщения
 ```php
 use VKHP\Method as VKHPM;
@@ -44,7 +46,7 @@ use VKHP\Generator as VKHPG;
 // для установки типа клавиатуры используется второй аргумент
 // KM_ONETIME - одноразовая, KM_INLINE - инлайн
 $keyboard = VKHPG::keyboard([[
-    //            текст              цвет          payload (полезная нагрукза)
+    //            текст              цвет          payload (полезная нагрузка)
     VKHPG::button('Название кнопки', VKHPG::BLUE,  [ 'command' => 'start' ]),
     VKHPG::button('Вторая кнопка',   VKHPG::GREEN, [ 'second_btn' => true ]),
 ]], VKHPG::KM_ONETIME);
