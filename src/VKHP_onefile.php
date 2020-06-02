@@ -80,6 +80,30 @@ class Generator
     }
 
     /**
+     * Generate button with type open_link
+     *
+     * @param string     $label   Button label
+     * @param string     $link    Link in button
+     * @param array|null $payload Button payload
+     *
+     * @return array
+     */
+    public static function buttonLink(
+        string $label,
+        string $link,
+        ?array $payload = null
+    ): array {
+        return [
+            'action' => [
+                'type' => 'open_link',
+                'link' => $link,
+                'label' => $label,
+                'payload' => self::payloadEncode($payload)
+            ]
+        ];
+    }
+
+    /**
      * Generate button with type location
      *
      * @param array|null $payload Button payload
