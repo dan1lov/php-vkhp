@@ -9,17 +9,17 @@ class Scenarios
     /**
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
      */
-    private $file;
+    protected $file;
 
     /**
      * @var array
      */
-    private $data;
+    protected $data;
 
     /**
      * Method for checking existing temporary file
@@ -32,25 +32,30 @@ class Scenarios
      */
     public static function check(string $temp_folder, int $id, bool $return = false)
     {
-        if (
-            ! file_exists($temp_folder)
-            || ! file_exists("{$temp_folder}/file_id{$id}.json")
-        ) { return false; }
-        elseif (! $return) { return true; }
-
-        return new self($temp_folder, $id);
+        if (! file_exists("{$temp_folder}/file_id{$id}.json")) {
+            return false;
+        } elseif (! $return) {
+            return true;
+        } else {
+            return new self($temp_folder, $id);
+        }
     }
 
     public function __construct(string $temp_folder, string $id, array $data = [])
     {
-        if (! file_exists($temp_folder)) { return false; }
+        if (! file_exists($temp_folder)) {
+            return false;
+        }
+
         $this->id = $id;
         $this->file = "{$temp_folder}/file_id{$id}.json";
-
-        if (file_exists($this->file)) {
-            $this->data = json_decode(file_get_contents( $this->file ), true);
-            if (isset($this->data['one_time'])) { unlink($this->file); }
-        } else $this->data = $data;
+        $this->data = file_exists($this->file)
+            ? json_decode(file_get_contents($this->file), true)
+            : $data;
+        
+        if (file_exists($this->file) && isset($this->data['__one_time'])) {
+            $this->clear();
+        }
     }
 
     /**

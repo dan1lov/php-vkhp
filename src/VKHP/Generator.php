@@ -44,15 +44,15 @@ class Generator
      *
      * @return string
      */
-    public static function keyboard(
-        array $buttons,
-        int $mode = 0
-    ): string {
-        return json_encode([
-            'one_time' => (bool) ($mode & self::KM_ONETIME),
-            'inline' => (bool) ($mode & self::KM_INLINE),
-            'buttons' => $buttons
-        ]);
+    public static function keyboard(array $buttons, int $mode = 0): string
+    {
+        return json_encode(
+            [
+                'one_time' => (bool) ($mode & self::KM_ONETIME),
+                'inline' => (bool) ($mode & self::KM_INLINE),
+                'buttons' => $buttons
+            ]
+        );
     }
 
     /**
@@ -73,7 +73,7 @@ class Generator
             'action' => [
                 'type' => 'text',
                 'label' => $label,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ],
             'color' => $color
         ];
@@ -82,16 +82,16 @@ class Generator
     /**
      * Generate button with type location
      *
-     * @param array $payload Button payload
+     * @param array|null $payload Button payload
      *
      * @return array
      */
-    public static function buttonLocation(array $payload): array
+    public static function buttonLocation(?array $payload = null): array
     {
         return [
             'action' => [
                 'type' => 'location',
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -99,18 +99,18 @@ class Generator
     /**
      * Generate button with type vkpay
      *
-     * @param string $hash    Hash for button
-     * @param array  $payload Button payload
+     * @param string     $hash    Hash for button
+     * @param array|null $payload Button payload
      *
      * @return array
      */
-    public static function buttonVKPay(string $hash, array $payload): array
+    public static function buttonVKPay(string $hash, ?array $payload = null): array
     {
         return [
             'action' => [
                 'type' => 'vkpay',
                 'hash' => $hash,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -118,11 +118,11 @@ class Generator
     /**
      * Generate button with type open_app
      *
-     * @param string  $label    Button label
-     * @param integer $app_id   Application id
-     * @param integer $owner_id Owner id
-     * @param string  $hash     Hash for button
-     * @param array   $payload  Button payload
+     * @param string     $label    Button label
+     * @param integer    $app_id   Application id
+     * @param integer    $owner_id Owner id
+     * @param string     $hash     Hash for button
+     * @param array|null $payload  Button payload
      *
      * @return array
      */
@@ -131,7 +131,7 @@ class Generator
         int $app_id,
         int $owner_id,
         string $hash,
-        array $payload
+        ?array $payload = null
     ): array {
         return [
             'action' => [
@@ -140,7 +140,7 @@ class Generator
                 'app_id' => $app_id,
                 'owner_id' => $owner_id,
                 'hash' => $hash,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -148,12 +148,12 @@ class Generator
     /**
      * Encode payload
      *
-     * @param mixed $payload Payload
+     * @param array|null $payload Payload
      *
-     * @return void
+     * @return string
      */
-    private static function jEncode($payload)
+    protected static function payloadEncode(?array $payload): string
     {
-        return $payload === null ? $payload : json_encode($payload);
+        return $payload === null ? '' : json_encode($payload);
     }
 }

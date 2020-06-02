@@ -9,7 +9,7 @@ class Method
     /**
      * @var string
      */
-    private static $version = '5.107';
+    protected static $version = '5.107';
 
     /**
      * Make query to VK API
@@ -25,10 +25,10 @@ class Method
         string $method,
         array $params
     ): object {
-        $methodUrl = "https://api.vk.com/method/{$method}";
-        $params = $params + [ 'access_token' => $access_token, 'v' => self::$version ];
+        $method_url = "https://api.vk.com/method/{$method}";
+        $params += [ 'access_token' => $access_token, 'v' => self::$version ];
 
-        $request = \VKHP\Request::makeJson($methodUrl, $params);
+        $request = \VKHP\Request::makeJson($method_url, $params);
         $request->ok = isset($request->response);
         return $request;
     }
@@ -63,9 +63,14 @@ class Method
             $params['user_ids'] = $user_ids_str;
 
             $req = self::make($access_token, 'messages.send', $params);
-            if ($req->ok === false) { return $req; }
+            if ($req->ok === false) {
+                return $req;
+            }
+
             foreach ($req->response as $message) {
-                if (isset($message->error)) {continue;}
+                if (isset($message->error)) {
+                    continue;
+                }
 
                 $res[] = $message;
                 $suc += 1;
@@ -91,7 +96,9 @@ class Method
         array $files,
         array $params
     ): array {
-        if (empty($files)) { return []; }
+        if (empty($files)) {
+            return array();
+        }
         if (empty($params['peer_id'])) {
             throw new \Exception('field `peer_id` is empty');
         }
@@ -101,20 +108,33 @@ class Method
 
 
         $gurl = self::make($access_token, 'photos.getMessagesUploadServer', $params);
-        if ($gurl->ok === false) { return (array) $gurl; }
+        if ($gurl->ok === false) {
+            return (array) $gurl;
+        }
 
         $saved_files = self::saveFiles($files);
-        $upload_files = \VKHP\Request::makeJson($gurl->response->upload_url,
-            $saved_files['cfiles'], [ 'Content-type: multipart/form-data;charset=utf-8' ]);
+        $upload_files = \VKHP\Request::makeJson(
+            $gurl->response->upload_url,
+            $saved_files['cfiles'],
+            [ 'Content-type: multipart/form-data;charset=utf-8' ]
+        );
         self::deleteFiles($saved_files['paths']);
-        if (isset($upload_files->error)) { return (array) $upload_files; }
+        if (isset($upload_files->error)) {
+            return (array) $upload_files;
+        }
 
-        $save_files = self::make($access_token, 'photos.saveMessagesPhoto', [
-            'server' => $upload_files->server,
-            'photo' => $upload_files->photo,
-            'hash' => $upload_files->hash
-        ] + $params);
-        if ($save_files->ok === false) { return (array) $save_files; }
+        $save_files = self::make(
+            $access_token,
+            'photos.saveMessagesPhoto',
+            [
+                'server' => $upload_files->server,
+                'photo' => $upload_files->photo,
+                'hash' => $upload_files->hash
+            ] + $params
+        );
+        if ($save_files->ok === false) {
+            return (array) $save_files;
+        }
 
         $attachment = [];
         foreach ($save_files->response as $photo) {
@@ -130,7 +150,7 @@ class Method
      * @param array  $files        Files to upload
      * @param array  $params       Parameters for uploading method
      *
-     * @throws Exception if field peer_id/type is not specified in $params array 
+     * @throws Exception if field peer_id/type is not specified in $params array
      *
      * @return array
      */
@@ -147,22 +167,37 @@ class Method
         }
 
         $gurl = self::make($access_token, 'docs.getMessagesUploadServer', $params);
-        if ($gurl->ok === false) { return (array) $gurl; }
+        if ($gurl->ok === false) {
+            return (array) $gurl;
+        }
 
         $attachment = [];
         foreach ($files as $file) {
             $saved_file = self::saveFiles([ $file ], true);
-            $upload_file = \VKHP\Request::makeJson($gurl->response->upload_url,
-                $saved_file['cfiles'], [ 'Content-type: multipart/form-data;charset=utf-8' ]);
+            $upload_file = \VKHP\Request::makeJson(
+                $gurl->response->upload_url,
+                $saved_file['cfiles'],
+                [ 'Content-type: multipart/form-data;charset=utf-8' ]
+            );
             self::deleteFiles($saved_file['paths']);
-            if (isset($upload_file->error)) { return (array) $upload_file; }
+            if (isset($upload_file->error)) {
+                return (array) $upload_file;
+            }
 
-            $save_file = self::make($access_token, 'docs.save', [
-                'file' => $upload_file->file
-            ] + $params);
-            if ($save_file->ok === false) { return (array) $save_files; }
+            $save_file = self::make(
+                $access_token,
+                'docs.save',
+                [
+                    'file' => $upload_file->file
+                ] + $params
+            );
+            if ($save_file->ok === false) {
+                return (array) $save_files;
+            }
             if (array_key_exists(0, $save_file->response)) {
-                $save_file->response = (object) [ $params['type'] => $save_file->response[0] ];
+                $save_file->response = (object) [
+                    $params['type'] => $save_file->response[0]
+                ];
             }
 
             $file = $save_file->response->{$params['type']};
@@ -181,7 +216,7 @@ class Method
      *
      * @return array
      */
-    private static function saveFiles(array $files, bool $single = false): array
+    protected static function saveFiles(array $files, bool $single = false): array
     {
         [$paths, $cfiles, $i] = [[], [], 1];
         foreach ($files as $file) {
@@ -189,18 +224,24 @@ class Method
             if (! file_exists($file)) {
                 $paths[] = $fpath = tempnam(sys_get_temp_dir(), 'VKHP');
                 if (($contents = file_get_contents($file)) === false) {
-                    throw new \Exception("can't retrieve file contents for path '{$file}'");
+                    throw new \Exception(
+                        "can't retrieve file contents for path '{$file}'"
+                    );
                 }
 
                 file_put_contents($fpath, $contents);
-            } else { $fpath = realpath($file); }
+            } else {
+                $fpath = realpath($file);
+            }
 
             $mime_type = mime_content_type($fpath);
             $cfile = new \CURLFile($fpath, $mime_type, $pathinfo['basename']);
 
             $cfkey = $single ? 'file' : ('file' . $i++);
             $cfiles[$cfkey] = $cfile;
-            if ($single) {break;}
+            if ($single) {
+                break;
+            }
         }
         return [ 'paths' => $paths, 'cfiles' => $cfiles ];
     }
@@ -212,7 +253,7 @@ class Method
      *
      * @return void
      */
-    private static function deleteFiles(array $paths): void
+    protected static function deleteFiles(array $paths): void
     {
         foreach ($paths as $path) {
             if (file_exists($path)) {
