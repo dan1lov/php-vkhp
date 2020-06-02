@@ -44,15 +44,15 @@ class Generator
      *
      * @return string
      */
-    public static function keyboard(
-        array $buttons,
-        int $mode = 0
-    ): string {
-        return json_encode([
-            'one_time' => (bool) ($mode & self::KM_ONETIME),
-            'inline' => (bool) ($mode & self::KM_INLINE),
-            'buttons' => $buttons
-        ]);
+    public static function keyboard(array $buttons, int $mode = 0): string
+    {
+        return json_encode(
+            [
+                'one_time' => (bool) ($mode & self::KM_ONETIME),
+                'inline' => (bool) ($mode & self::KM_INLINE),
+                'buttons' => $buttons
+            ]
+        );
     }
 
     /**
@@ -73,7 +73,7 @@ class Generator
             'action' => [
                 'type' => 'text',
                 'label' => $label,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ],
             'color' => $color
         ];
@@ -82,16 +82,16 @@ class Generator
     /**
      * Generate button with type location
      *
-     * @param array $payload Button payload
+     * @param array|null $payload Button payload
      *
      * @return array
      */
-    public static function buttonLocation(array $payload): array
+    public static function buttonLocation(?array $payload = null): array
     {
         return [
             'action' => [
                 'type' => 'location',
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -99,18 +99,18 @@ class Generator
     /**
      * Generate button with type vkpay
      *
-     * @param string $hash    Hash for button
-     * @param array  $payload Button payload
+     * @param string     $hash    Hash for button
+     * @param array|null $payload Button payload
      *
      * @return array
      */
-    public static function buttonVKPay(string $hash, array $payload): array
+    public static function buttonVKPay(string $hash, ?array $payload = null): array
     {
         return [
             'action' => [
                 'type' => 'vkpay',
                 'hash' => $hash,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -118,11 +118,11 @@ class Generator
     /**
      * Generate button with type open_app
      *
-     * @param string  $label    Button label
-     * @param integer $app_id   Application id
-     * @param integer $owner_id Owner id
-     * @param string  $hash     Hash for button
-     * @param array   $payload  Button payload
+     * @param string     $label    Button label
+     * @param integer    $app_id   Application id
+     * @param integer    $owner_id Owner id
+     * @param string     $hash     Hash for button
+     * @param array|null $payload  Button payload
      *
      * @return array
      */
@@ -131,7 +131,7 @@ class Generator
         int $app_id,
         int $owner_id,
         string $hash,
-        array $payload
+        ?array $payload = null
     ): array {
         return [
             'action' => [
@@ -140,7 +140,7 @@ class Generator
                 'app_id' => $app_id,
                 'owner_id' => $owner_id,
                 'hash' => $hash,
-                'payload' => self::jEncode($payload)
+                'payload' => self::payloadEncode($payload)
             ]
         ];
     }
@@ -148,13 +148,13 @@ class Generator
     /**
      * Encode payload
      *
-     * @param mixed $payload Payload
+     * @param array|null $payload Payload
      *
-     * @return void
+     * @return string
      */
-    private static function jEncode($payload)
+    protected static function payloadEncode(?array $payload): string
     {
-        return $payload === null ? $payload : json_encode($payload);
+        return $payload === null ? '' : json_encode($payload);
     }
 }
 
@@ -166,7 +166,7 @@ class Method
     /**
      * @var string
      */
-    private static $version = '5.107';
+    protected static $version = '5.107';
 
     /**
      * Make query to VK API
@@ -174,7 +174,7 @@ class Method
      * @param string $access_token Access token
      * @param string $method       Method name
      * @param array  $params       Parameters for method
-     * 
+     *
      * @return object
      */
     public static function make(
@@ -182,10 +182,10 @@ class Method
         string $method,
         array $params
     ): object {
-        $methodUrl = "https://api.vk.com/method/{$method}";
-        $params = $params + [ 'access_token' => $access_token, 'v' => self::$version ];
+        $method_url = "https://api.vk.com/method/{$method}";
+        $params += [ 'access_token' => $access_token, 'v' => self::$version ];
 
-        $request = \VKHP\Request::makeJson($methodUrl, $params);
+        $request = \VKHP\Request::makeJson($method_url, $params);
         $request->ok = isset($request->response);
         return $request;
     }
@@ -220,9 +220,14 @@ class Method
             $params['user_ids'] = $user_ids_str;
 
             $req = self::make($access_token, 'messages.send', $params);
-            if ($req->ok === false) { return $req; }
+            if ($req->ok === false) {
+                return $req;
+            }
+
             foreach ($req->response as $message) {
-                if (isset($message->error)) {continue;}
+                if (isset($message->error)) {
+                    continue;
+                }
 
                 $res[] = $message;
                 $suc += 1;
@@ -248,7 +253,9 @@ class Method
         array $files,
         array $params
     ): array {
-        if (empty($files)) { return []; }
+        if (empty($files)) {
+            return array();
+        }
         if (empty($params['peer_id'])) {
             throw new \Exception('field `peer_id` is empty');
         }
@@ -258,20 +265,33 @@ class Method
 
 
         $gurl = self::make($access_token, 'photos.getMessagesUploadServer', $params);
-        if ($gurl->ok === false) { return (array) $gurl; }
+        if ($gurl->ok === false) {
+            return (array) $gurl;
+        }
 
         $saved_files = self::saveFiles($files);
-        $upload_files = \VKHP\Request::makeJson($gurl->response->upload_url,
-            $saved_files['cfiles'], [ 'Content-type: multipart/form-data;charset=utf-8' ]);
+        $upload_files = \VKHP\Request::makeJson(
+            $gurl->response->upload_url,
+            $saved_files['cfiles'],
+            [ 'Content-type: multipart/form-data;charset=utf-8' ]
+        );
         self::deleteFiles($saved_files['paths']);
-        if (isset($upload_files->error)) { return (array) $upload_files; }
+        if (isset($upload_files->error)) {
+            return (array) $upload_files;
+        }
 
-        $save_files = self::make($access_token, 'photos.saveMessagesPhoto', [
-            'server' => $upload_files->server,
-            'photo' => $upload_files->photo,
-            'hash' => $upload_files->hash
-        ] + $params);
-        if ($save_files->ok === false) { return (array) $save_files; }
+        $save_files = self::make(
+            $access_token,
+            'photos.saveMessagesPhoto',
+            [
+                'server' => $upload_files->server,
+                'photo' => $upload_files->photo,
+                'hash' => $upload_files->hash
+            ] + $params
+        );
+        if ($save_files->ok === false) {
+            return (array) $save_files;
+        }
 
         $attachment = [];
         foreach ($save_files->response as $photo) {
@@ -287,7 +307,7 @@ class Method
      * @param array  $files        Files to upload
      * @param array  $params       Parameters for uploading method
      *
-     * @throws Exception if field peer_id/type is not specified in $params array 
+     * @throws Exception if field peer_id/type is not specified in $params array
      *
      * @return array
      */
@@ -304,22 +324,37 @@ class Method
         }
 
         $gurl = self::make($access_token, 'docs.getMessagesUploadServer', $params);
-        if ($gurl->ok === false) { return (array) $gurl; }
+        if ($gurl->ok === false) {
+            return (array) $gurl;
+        }
 
         $attachment = [];
         foreach ($files as $file) {
             $saved_file = self::saveFiles([ $file ], true);
-            $upload_file = \VKHP\Request::makeJson($gurl->response->upload_url,
-                $saved_file['cfiles'], [ 'Content-type: multipart/form-data;charset=utf-8' ]);
+            $upload_file = \VKHP\Request::makeJson(
+                $gurl->response->upload_url,
+                $saved_file['cfiles'],
+                [ 'Content-type: multipart/form-data;charset=utf-8' ]
+            );
             self::deleteFiles($saved_file['paths']);
-            if (isset($upload_file->error)) { return (array) $upload_file; }
+            if (isset($upload_file->error)) {
+                return (array) $upload_file;
+            }
 
-            $save_file = self::make($access_token, 'docs.save', [
-                'file' => $upload_file->file
-            ] + $params);
-            if ($save_file->ok === false) { return (array) $save_files; }
+            $save_file = self::make(
+                $access_token,
+                'docs.save',
+                [
+                    'file' => $upload_file->file
+                ] + $params
+            );
+            if ($save_file->ok === false) {
+                return (array) $save_files;
+            }
             if (array_key_exists(0, $save_file->response)) {
-                $save_file->response = (object) [ $params['type'] => $save_file->response[0] ];
+                $save_file->response = (object) [
+                    $params['type'] => $save_file->response[0]
+                ];
             }
 
             $file = $save_file->response->{$params['type']};
@@ -338,7 +373,7 @@ class Method
      *
      * @return array
      */
-    private static function saveFiles(array $files, bool $single = false): array
+    protected static function saveFiles(array $files, bool $single = false): array
     {
         [$paths, $cfiles, $i] = [[], [], 1];
         foreach ($files as $file) {
@@ -346,18 +381,24 @@ class Method
             if (! file_exists($file)) {
                 $paths[] = $fpath = tempnam(sys_get_temp_dir(), 'VKHP');
                 if (($contents = file_get_contents($file)) === false) {
-                    throw new \Exception("can't retrieve file contents for path '{$file}'");
+                    throw new \Exception(
+                        "can't retrieve file contents for path '{$file}'"
+                    );
                 }
 
                 file_put_contents($fpath, $contents);
-            } else { $fpath = realpath($file); }
+            } else {
+                $fpath = realpath($file);
+            }
 
             $mime_type = mime_content_type($fpath);
             $cfile = new \CURLFile($fpath, $mime_type, $pathinfo['basename']);
 
             $cfkey = $single ? 'file' : ('file' . $i++);
             $cfiles[$cfkey] = $cfile;
-            if ($single) {break;}
+            if ($single) {
+                break;
+            }
         }
         return [ 'paths' => $paths, 'cfiles' => $cfiles ];
     }
@@ -369,7 +410,7 @@ class Method
      *
      * @return void
      */
-    private static function deleteFiles(array $paths): void
+    protected static function deleteFiles(array $paths): void
     {
         foreach ($paths as $path) {
             if (file_exists($path)) {
@@ -454,17 +495,17 @@ class Scenarios
     /**
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
      */
-    private $file;
+    protected $file;
 
     /**
      * @var array
      */
-    private $data;
+    protected $data;
 
     /**
      * Method for checking existing temporary file
@@ -477,25 +518,30 @@ class Scenarios
      */
     public static function check(string $temp_folder, int $id, bool $return = false)
     {
-        if (
-            ! file_exists($temp_folder)
-            || ! file_exists("{$temp_folder}/file_id{$id}.json")
-        ) { return false; }
-        elseif (! $return) { return true; }
-
-        return new self($temp_folder, $id);
+        if (! file_exists("{$temp_folder}/file_id{$id}.json")) {
+            return false;
+        } elseif (! $return) {
+            return true;
+        } else {
+            return new self($temp_folder, $id);
+        }
     }
 
     public function __construct(string $temp_folder, string $id, array $data = [])
     {
-        if (! file_exists($temp_folder)) { return false; }
+        if (! file_exists($temp_folder)) {
+            return false;
+        }
+
         $this->id = $id;
         $this->file = "{$temp_folder}/file_id{$id}.json";
-
-        if (file_exists($this->file)) {
-            $this->data = json_decode(file_get_contents( $this->file ), true);
-            if (isset($this->data['one_time'])) { unlink($this->file); }
-        } else $this->data = $data;
+        $this->data = file_exists($this->file)
+            ? json_decode(file_get_contents($this->file), true)
+            : $data;
+        
+        if (file_exists($this->file) && isset($this->data['__one_time'])) {
+            $this->clear();
+        }
     }
 
     /**
