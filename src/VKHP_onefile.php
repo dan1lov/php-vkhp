@@ -415,7 +415,7 @@ class Method
     }
 
     /**
-     * Creaating CURLFiles object for sending in CURLOPT_POSTFIELDS
+     * Creating CURLFile objects for sending in CURLOPT_POSTFIELDS
      *
      * @param array   $paths      Array of paths
      * @param boolean $single     Flag for single uploading
@@ -455,7 +455,7 @@ class Method
     }
 
     /**
-     * Delete files from paths in $paths arrays.
+     * Delete files from paths in $paths array.
      *
      * If $delete_all is set to TRUE, then even files that
      * were not saved to the temporary directory will be deleted
