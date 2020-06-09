@@ -112,13 +112,13 @@ class Method
             return (array) $gurl;
         }
 
-        $saved_files = self::saveFiles($files);
+        $saved_files = self::_saveFiles($files);
         $upload_files = \VKHP\Request::makeJson(
             $gurl->response->upload_url,
-            $saved_files['cfiles'],
+            self::_createCURLFiles($saved_files),
             [ 'Content-type: multipart/form-data;charset=utf-8' ]
         );
-        self::deleteFiles($saved_files['paths']);
+        self::_deleteFiles($saved_files);
         if (isset($upload_files->error)) {
             return (array) $upload_files;
         }
@@ -173,13 +173,13 @@ class Method
 
         $attachment = [];
         foreach ($files as $file) {
-            $saved_file = self::saveFiles([ $file ], true);
+            $saved_file = self::_saveFiles([ $file ]);
             $upload_file = \VKHP\Request::makeJson(
                 $gurl->response->upload_url,
-                $saved_file['cfiles'],
+                self::_createCURLFiles($saved_file, true),
                 [ 'Content-type: multipart/form-data;charset=utf-8' ]
             );
-            self::deleteFiles($saved_file['paths']);
+            self::_deleteFiles($saved_file);
             if (isset($upload_file->error)) {
                 return (array) $upload_file;
             }
@@ -209,53 +209,93 @@ class Method
     /**
      * Saving files in temporary folder
      *
-     * @param array   $files  Files to saving
-     * @param boolean $single Flag for single uploading
+     * @param array $files Files to saving
+     * @param array $paths Array of paths
      *
      * @throws Exception if can't retrieve file contents for a certain path
      *
      * @return array
      */
-    protected static function saveFiles(array $files, bool $single = false): array
+    public static function _saveFiles(array $files, array $paths = []): array
     {
-        [$paths, $cfiles, $i] = [[], [], 1];
         foreach ($files as $file) {
-            $pathinfo = pathinfo($file);
-            if (! file_exists($file)) {
-                $paths[] = $fpath = tempnam(sys_get_temp_dir(), 'VKHP');
-                if (($contents = file_get_contents($file)) === false) {
-                    throw new \Exception(
-                        "can't retrieve file contents for path '{$file}'"
-                    );
-                }
-
-                file_put_contents($fpath, $contents);
-            } else {
-                $fpath = realpath($file);
+            if (file_exists($file)) {
+                $paths[] = realpath($file);
+                continue;
             }
 
-            $mime_type = mime_content_type($fpath);
-            $cfile = new \CURLFile($fpath, $mime_type, $pathinfo['basename']);
+            $paths[] = $fpath = tempnam(sys_get_temp_dir(), 'VKHP');
+            if (($contents = file_get_contents($file)) === false) {
+                throw new \Exception("can't retrieve file contents for path '{$file}'");
+            }
+            file_put_contents($fpath, $contents);
+        }
+        return $paths;
+    }
 
-            $cfkey = $single ? 'file' : ('file' . $i++);
+    /**
+     * Creaating CURLFiles object for sending in CURLOPT_POSTFIELDS
+     *
+     * @param array   $paths      Array of paths
+     * @param boolean $single     Flag for single uploading
+     * @param string  $field_name Field name in post fields
+     *
+     * @return array
+     */
+    public static function _createCURLFiles(
+        array $paths,
+        bool $single = false,
+        string $field_name = 'file'
+    ): array {
+        [$cfiles, $i] = [[], 1];
+        $mime_types = [
+            'image/jpeg' => '.jpg',
+            'image/png' => '.png',
+            'text/plain' => '.txt'
+        ];
+
+        foreach ($paths as $path) {
+            $pathinfo = pathinfo($path);
+            $mime_type = mime_content_type($path);
+
+            $basename = in_array($mime_type, array_flip($mime_types))
+                ? $pathinfo['filename'] . $mime_types[$mime_type]
+                : $pathinfo['basename'];
+
+            $cfile = new \CURLFile($path, $mime_type, $basename);
+            $cfkey = $single ? $field_name : ($field_name . $i++);
+
             $cfiles[$cfkey] = $cfile;
             if ($single) {
                 break;
             }
         }
-        return [ 'paths' => $paths, 'cfiles' => $cfiles ];
+        return $cfiles;
     }
 
     /**
-     * Delete files from paths in $paths array
+     * Delete files from paths in $paths arrays.
      *
-     * @param array $paths Array of paths to deleting
+     * If $delete_all is set to TRUE, then even files that
+     * were not saved to the temporary directory will be deleted
+     *
+     * @param array   $paths      Array of paths to deleting
+     * @param boolean $delete_all Flag to delete all files in $paths
      *
      * @return void
      */
-    protected static function deleteFiles(array $paths): void
-    {
+    public static function _deleteFiles(
+        array $paths,
+        bool $delete_all = false
+    ): void {
         foreach ($paths as $path) {
+            // realpath нужен для избежания проблем на windows,
+            // чтобы обратные слеши (\) заменились на обычные слеши (/)
+            $temp_path = realpath(sys_get_temp_dir());
+            if (! $delete_all && mb_strpos($path, $temp_path) !== 0) {
+                continue;
+            }
+
             if (file_exists($path)) {
                 unlink($path);
             }
