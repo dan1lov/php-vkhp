@@ -603,7 +603,7 @@ class Scenarios
             ? json_decode(file_get_contents($this->file), true)
             : $data;
         
-        if (file_exists($this->file) && isset($this->data['__one_time'])) {
+        if (file_exists($this->file) && isset($this->data['__onetime'])) {
             $this->clear();
         }
     }
