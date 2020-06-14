@@ -39,19 +39,17 @@ class Method
      * @param string $access_token Access token
      * @param array  $params       Parameters for messages.send method
      *
-     * @throws Exception if field user_ids is empty
-     *
      * @return object
      */
     public static function messagesSend(string $access_token, array $params): object
     {
+        $params['random_id'] = $params['random_id'] ?? 0;
         $user_ids = $params['user_ids'] ?? null;
         if (empty($user_ids)) {
-            throw new \Exception('field `user_ids` is empty');
+            return self::make($access_token, 'messages.send', $params);
         }
 
 
-        $params['random_id'] = $params['random_id'] ?? 0;
         $user_ids = is_array($user_ids) ? $user_ids : explode(',', $user_ids);
         $user_ids = array_unique(array_filter($user_ids));
         $users_count = count($user_ids);
