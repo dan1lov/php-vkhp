@@ -509,10 +509,12 @@ class Request
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
             CURLOPT_HTTPHEADER => $headers ?? [],
-            CURLOPT_POST => $fields !== null,
         ] + (array) $options;
-        if ($ch_options[CURLOPT_POST]) {
-            $ch_options[CURLOPT_POSTFIELDS] = !$headers ? http_build_query($fields) : $fields;
+        if ($fields !== null) {
+            $ch_options[CURLOPT_POST] = true;
+            $ch_options[CURLOPT_POSTFIELDS] = !$headers
+                ? http_build_query($fields)
+                : $fields;
         }
         curl_setopt_array($ch, $ch_options);
 
