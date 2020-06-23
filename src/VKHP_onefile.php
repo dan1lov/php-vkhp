@@ -468,7 +468,7 @@ class Method
         bool $delete_all = false
     ): void {
         foreach ($paths as $path) {
-            // realpath нужен для избежания проблем на windows,
+            // realpath нужен во избежание проблем на windows,
             // чтобы обратные слеши (\) заменились на обычные слеши (/)
             $temp_path = realpath(sys_get_temp_dir());
             if (! $delete_all && mb_strpos($path, $temp_path) !== 0) {
