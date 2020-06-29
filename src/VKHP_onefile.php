@@ -230,7 +230,6 @@ class Method
             return self::make($access_token, 'messages.send', $params);
         }
 
-
         $user_ids = is_array($user_ids) ? $user_ids : explode(',', $user_ids);
         $user_ids = array_unique(array_filter($user_ids));
         $users_count = count($user_ids);
@@ -255,7 +254,7 @@ class Method
                 $suc += 1;
             }
         }
-        return (object) [ 'successful' => $suc, 'response' => $res ];
+        return (object) [ 'ok' => true, 'successful' => $suc, 'response' => $res ];
     }
 
     /**
