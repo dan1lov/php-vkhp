@@ -26,16 +26,18 @@ class Request
         $ch_options = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+            CURLOPT_USERAGENT => 'php-vkhp library',
             CURLOPT_HTTPHEADER => $headers ?? [],
-        ] + (array) $options;
-        if ($fields !== null) {
-            $ch_options[CURLOPT_POST] = true;
-            $ch_options[CURLOPT_POSTFIELDS] = !$headers
-                ? http_build_query($fields)
-                : $fields;
-        }
+        ] + ($options ?? []);
         curl_setopt_array($ch, $ch_options);
+
+        if (! empty($fields)) {
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => !$headers
+                    ? http_build_query($fields) : $fields
+            ]);
+        }
 
         $response = curl_exec($ch);
         curl_close($ch);
