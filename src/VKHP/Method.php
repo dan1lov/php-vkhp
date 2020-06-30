@@ -34,7 +34,7 @@ class Method
     }
 
     /**
-     * Sending message to community users
+     * Send message to users
      *
      * @param string $access_token Access token
      * @param array  $params       Parameters for messages.send method
@@ -44,36 +44,32 @@ class Method
     public static function messagesSend(string $access_token, array $params): object
     {
         $params['random_id'] = $params['random_id'] ?? 0;
-        $user_ids = $params['user_ids'] ?? null;
-        if (empty($user_ids)) {
+        if (! isset($params['user_ids'])) {
             return self::make($access_token, 'messages.send', $params);
         }
 
-        $user_ids = is_array($user_ids) ? $user_ids : explode(',', $user_ids);
+        $user_ids = is_array($params['user_ids'])
+            ? $params['user_ids'] : explode(',', $params['user_ids']);
         $user_ids = array_unique(array_filter($user_ids));
-        $users_count = count($user_ids);
 
-        [$res, $suc] = [[], 0];
-        // j -- количество идов, которые будут взяты
-        for ($i = 0, $j = 100, $c = ceil($users_count / $j); $i < $c; $i++) {
-            $user_ids_str = implode(',', array_slice($user_ids, $i * $j, $j));
-            $params['user_ids'] = $user_ids_str;
+        $successful = 0;
+        $responses = [];
 
-            $req = self::make($access_token, 'messages.send', $params);
-            if ($req->ok === false) {
-                return $req;
-            }
+        $chunked_ids = array_chunk($user_ids, 100);
+        foreach ($chunked_ids as $user_ids) {
+            $params['user_ids'] = implode(',', $user_ids);
 
-            foreach ($req->response as $message) {
-                if (isset($message->error)) {
-                    continue;
-                }
+            $request = self::make($access_token, 'messages.send', $params);
+            if ($request->ok === false) {return $request;}
 
-                $res[] = $message;
-                $suc += 1;
-            }
+            $responses += $request->response;
+            $successful += count(array_column($request->response, 'message_id'));
         }
-        return (object) [ 'ok' => true, 'successful' => $suc, 'response' => $res ];
+        return (object) [
+            'ok' => true,
+            'successful' => $successful,
+            'response' => $responses
+        ];
     }
 
     /**
