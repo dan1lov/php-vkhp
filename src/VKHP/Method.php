@@ -9,7 +9,7 @@ class Method
     /**
      * @var string
      */
-    protected static $version = '5.110';
+    protected static $version = '5.120';
 
     /**
      * Make query to VK API
