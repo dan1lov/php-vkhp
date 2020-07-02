@@ -79,7 +79,6 @@ class Method
      * @param array  $files        Files to upload
      * @param array  $params       Parameters for uploading method
      *
-     * @throws Exception if peer_id parameter is not specified in $params array
      * @throws Exception if count of files in $files array more than 5
      *
      * @return array
@@ -87,13 +86,10 @@ class Method
     public static function uploadMessagesPhoto(
         string $access_token,
         array $files,
-        array $params
+        array $params = []
     ): array {
         if (empty($files)) {
             return array();
-        }
-        if (empty($params['peer_id'])) {
-            throw new \Exception('field `peer_id` is empty');
         }
         if (count($files) > 5) {
             throw new \Exception('too much files (>5)');
