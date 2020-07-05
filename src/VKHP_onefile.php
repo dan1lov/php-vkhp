@@ -153,8 +153,8 @@ class Generator
     public static function buttonVKApps(
         string $label,
         int $app_id,
-        int $owner_id,
-        string $hash,
+        int $owner_id = 0,
+        string $hash = '',
         ?array $payload = null
     ): array {
         return [
