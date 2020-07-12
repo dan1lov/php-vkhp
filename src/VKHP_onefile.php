@@ -61,17 +61,19 @@ class Generator
      * @param string     $label   Button label
      * @param string     $color   Button color
      * @param array|null $payload Button payload
+     * @param string     $type    Button type (text|callback)
      *
      * @return array
      */
     public static function button(
         string $label,
         string $color = self::WHITE,
-        ?array $payload = null
+        ?array $payload = null,
+        string $type = 'text'
     ): array {
         return [
             'action' => [
-                'type' => 'text',
+                'type' => $type,
                 'label' => $label,
                 'payload' => self::payloadEncode($payload)
             ],
@@ -82,23 +84,18 @@ class Generator
     /**
      * Generate button with type open_link
      *
-     * @param string     $label   Button label
-     * @param string     $link    Link in button
-     * @param array|null $payload Button payload
+     * @param string $label Button label
+     * @param string $link  Link in button
      *
      * @return array
      */
-    public static function buttonLink(
-        string $label,
-        string $link,
-        ?array $payload = null
-    ): array {
+    public static function buttonLink(string $label, string $link): array
+    {
         return [
             'action' => [
                 'type' => 'open_link',
                 'link' => $link,
-                'label' => $label,
-                'payload' => self::payloadEncode($payload)
+                'label' => $label
             ]
         ];
     }
@@ -123,18 +120,16 @@ class Generator
     /**
      * Generate button with type vkpay
      *
-     * @param string     $hash    Hash for button
-     * @param array|null $payload Button payload
+     * @param string $hash Hash for button
      *
      * @return array
      */
-    public static function buttonVKPay(string $hash, ?array $payload = null): array
+    public static function buttonVKPay(string $hash): array
     {
         return [
             'action' => [
                 'type' => 'vkpay',
-                'hash' => $hash,
-                'payload' => self::payloadEncode($payload)
+                'hash' => $hash
             ]
         ];
     }
@@ -142,11 +137,10 @@ class Generator
     /**
      * Generate button with type open_app
      *
-     * @param string     $label    Button label
-     * @param integer    $app_id   Application id
-     * @param integer    $owner_id Owner id
-     * @param string     $hash     Hash for button
-     * @param array|null $payload  Button payload
+     * @param string  $label    Button label
+     * @param integer $app_id   Application id
+     * @param integer $owner_id Owner id
+     * @param string  $hash     Hash for button
      *
      * @return array
      */
@@ -154,19 +148,28 @@ class Generator
         string $label,
         int $app_id,
         int $owner_id = 0,
-        string $hash = '',
-        ?array $payload = null
+        string $hash = ''
     ): array {
         return [
             'action' => [
                 'type' => 'open_app',
-                'label' => $label,
                 'app_id' => $app_id,
                 'owner_id' => $owner_id,
-                'hash' => $hash,
-                'payload' => self::payloadEncode($payload)
+                'label' => $label,
+                'hash' => $hash
             ]
         ];
+    }
+
+    /**
+     * @see self::button
+     */
+    public static function buttonCallback(
+        string $label,
+        string $color = self::WHITE,
+        ?array $payload = null
+    ): array {
+        return self::button($label, $color, $payload, 'callback');
     }
 
     /**
