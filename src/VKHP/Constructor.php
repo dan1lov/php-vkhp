@@ -34,7 +34,7 @@ class Constructor
         if (isset($this->commands[$command->id])) {
             $error_message = "Command '{$command->id}' already been added, passed"
                 . " with the same id was replaced with a new one";
-            trigger_error($error_message, E_USER_NOTICE);
+            trigger_error($error_message);
         }
 
         $this->commands[$command->id] = $command;
