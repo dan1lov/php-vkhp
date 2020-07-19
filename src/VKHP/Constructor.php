@@ -95,9 +95,11 @@ class Constructor
 
         $command_id = $this->findCommandId($payload_c, $text);
         if ($command_id !== false) {
-            $response = ($this->commands[$command_id]->command)();
+            $callable = $this->commands[$command_id]->command;
+            $response = $callable($this->parameters);
         } elseif ($command_id === false && $this->defaultCommand) {
-            $response = ($this->commands[$command_id]->command)();
+            $callable = $this->commands[$this->defaultCommand]->command;
+            $response = $callable($this->parameters);
         } else {
             $error_message = 'no command was found, nor was the default'
                 . ' command set';
