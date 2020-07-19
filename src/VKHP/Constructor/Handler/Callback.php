@@ -43,9 +43,9 @@ class Callback implements Handler
     }
 
     /**
-     * @see Handler::setEventCallback
+     * @see Handler::addEventCallback
      */
-    public function setEventCallback(string $event, callable $callback)
+    public function addEventCallback(string $event, callable $callback)
     {
         if (isset($this->events[$event])) {
             $error_message = "Event '{$event}' already been added, passed"

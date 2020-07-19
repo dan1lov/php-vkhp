@@ -21,12 +21,12 @@ interface Handler
     public function run();
 
     /**
-     * Set callback-function for event
+     * Add callback-function for event
      *
      * @param string $event      Event type
      * @param callable $callback Callback-function
      *
      * @return void
      */
-    public function setEventCallback(string $event, callable $callback);
+    public function addEventCallback(string $event, callable $callback);
 }
