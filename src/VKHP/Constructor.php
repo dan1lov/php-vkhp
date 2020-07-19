@@ -56,7 +56,7 @@ class Constructor
     /**
      * Setting the default command.
      * 
-     * Тeeded in cases where the command was not found, and it is necessary
+     * Needed in cases where the command was not found, and it is necessary
      * to return the answer in any case
      *
      * @param string $command_id Command id
@@ -131,7 +131,10 @@ class Constructor
         $command_id = false;
 
         if ($cid !== null) {
-            $command_id = array_search($cid, array_column($this->commands, 'id', 'id'));
+            $command_id = array_search(
+                $cid,
+                array_column($this->commands, 'id', 'id')
+            );
         }
 
         if ($text !== null && $command_id === false) {
