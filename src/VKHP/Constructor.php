@@ -2,7 +2,9 @@
 namespace VKHP;
 use VKHP\Constructor\Command;
 
-
+/**
+ * Constructor class
+ */
 class Constructor
 {
     /**
