@@ -21,6 +21,13 @@ class Command
      */
     protected $command;
 
+    /**
+     * Construct method
+     *
+     * @param string   $id      Unique string
+     * @param array    $aliases Text aliases
+     * @param callable $command Callback-function
+     */
     public function __construct(
         string $id,
         array $aliases,
@@ -38,11 +45,25 @@ class Command
         $this->command = $command;
     }
 
+    /**
+     * Magic method __get
+     *
+     * @param string $prop prop
+     *
+     * @return mixed
+     */
     public function __get(string $prop)
     {
         return $this->$prop;
     }
 
+    /**
+     * Magic method __isset
+     *
+     * @param string $prop prop
+     *
+     * @return boolean
+     */
     public function __isset(string $prop): bool
     {
         return isset($this->$prop);
