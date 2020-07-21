@@ -9,9 +9,9 @@ interface Handler
     /**
      * Get parameters
      *
-     * @return object
+     * @return object|null
      */
-    public function getParameters(): object;
+    public function getParameters();
 
     /**
      * Run
