@@ -133,7 +133,7 @@ class Constructor
             );
         }
 
-        if ($text && $command_id === false) {
+        if ($text && $command_id === null) {
             $commands_aliases = array_column($this->commands, 'aliases', 'id');
             foreach ($commands_aliases as $key => $aliases) {
                 if (array_search($text, $aliases) !== false) {
