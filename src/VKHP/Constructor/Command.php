@@ -34,10 +34,7 @@ class Command
         callable $command
     ) {
         if (empty($id)) {
-            throw new \Exception('id can not be a empty string');
-        }
-        if (empty($aliases)) {
-            throw new \Exception('command should have one or more aliases');
+            throw new \Exception('id cannot be empty string');
         }
 
         $this->id = $id;
