@@ -1,17 +1,13 @@
 <?php
 namespace VKHP\Constructor\Handler;
 use VKHP\Constructor\Handler;
+use VKHP\Constructor\Handler\AHandler;
 
 /**
  * Callback handler
  */
-class Callback implements Handler
+class Callback extends AHandler implements Handler
 {
-    /**
-     * @var array
-     */
-    protected $events;
-
     /**
      * @see Handler::getParameters
      */
@@ -40,20 +36,6 @@ class Callback implements Handler
         }
 
         $this->sendOk();
-    }
-
-    /**
-     * @see Handler::addEventCallback
-     */
-    public function addEventCallback(string $event, callable $callback)
-    {
-        if (isset($this->events[$event])) {
-            $error_message = "Event '{$event}' already been added, passed"
-                . " with the same event was replaced with a new one";
-            trigger_error($error_message, E_USER_NOTICE);
-        }
-
-        $this->events[$event] = $callback;
     }
 
     /**
