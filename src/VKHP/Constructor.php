@@ -41,7 +41,7 @@ class Constructor
     }
 
     /**
-     * Set parameters for successful executing execute() method
+     * Set parameters for successful executing with execute() method
      *
      * @param object $params Parameters
      *
@@ -89,20 +89,16 @@ class Constructor
             throw new \Eception($error_message);
         }
 
-        $payload_c = $this->parameters->message->payload->command
-            ?? $this->parameters->payload->command ?? null;
-        $text = $this->parameters->message->text ?? $this->parameters->text ?? null;
+        $message_obj = $this->parameters->message ?? $this->parameters;
+        $payload_c = $message_obj->payload->command ?? null;
+        $text = $message_obj->text ?? null;
 
         $command_id = $this->findCommandId($payload_c, $text);
-        if ($command_id !== false) {
-            $callable = $this->commands[$command_id]->command;
-            $response = $callable($this->parameters);
-        } elseif ($command_id === false && $this->defaultCommand) {
-            $callable = $this->commands[$this->defaultCommand]->command;
+        if ($command_id !== null || $this->defaultCommand !== null) {
+            $callable = $this->commands[$command_id ?? $this->defaultCommand]->command;
             $response = $callable($this->parameters);
         } else {
-            $error_message = 'no command was found, nor was the default'
-                . ' command set';
+            $error_message = 'no command was found, nor was the default command set';
             throw new \Exception($error_message);
         }
 
@@ -116,28 +112,28 @@ class Constructor
     /**
      * Find command by payload command or text aliases
      *
-     * @param string|null $cid  Payload-command
-     * @param string|null $text Command alias
+     * @param string|null $payload_c Payload-command
+     * @param string|null $text      Command alias
      *
-     * @return false|string
+     * @return null|string
      */
-    private function findCommandId(?string $cid, ?string $text)
+    private function findCommandId(?string $payload_c, ?string $text)
     {
         if (empty($this->commands)) {
             trigger_error('Commands list is empty, nothing to find');
-            return false;
+            return null;
         }
 
-        $command_id = false;
+        $command_id = null;
 
-        if ($cid !== null) {
+        if ($payload_c) {
             $command_id = array_search(
-                $cid,
+                $payload_c,
                 array_column($this->commands, 'id', 'id')
             );
         }
 
-        if ($text !== null && $command_id === false) {
+        if ($text && $command_id === false) {
             $commands_aliases = array_column($this->commands, 'aliases', 'id');
             foreach ($commands_aliases as $key => $aliases) {
                 if (array_search($text, $aliases) !== false) {
