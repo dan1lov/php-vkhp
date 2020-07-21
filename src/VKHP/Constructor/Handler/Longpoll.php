@@ -26,7 +26,7 @@ class Longpoll extends AHandler implements Handler
     private $updates;
 
     /**
-     * Construct function
+     * Construct method
      *
      * @param integer $group_id     Group id
      * @param string  $access_token Access token
@@ -59,13 +59,12 @@ class Longpoll extends AHandler implements Handler
                 switch ($request->failed) {
                     case 1:
                         $lps->ts = $request->ts;
-                        break;
+                        continue 2;
                     case 2: //
                     case 3:
                         $lps = $this->getLongPollServer();
-                        break;
+                        continue 2;
                 }
-                continue;
             }
 
             $this->updates = $request->updates;
